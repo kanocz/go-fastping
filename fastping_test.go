@@ -4,6 +4,8 @@ import (
 	"net"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSource(t *testing.T) {
@@ -240,4 +242,35 @@ func TestPayloadSizeCustom(t *testing.T) {
 	if len(d) != 64 {
 		t.Errorf("Payload size incorrect: got %d, expected: %d", len(d), 64)
 	}
+}
+
+func TestRemoveIp(t *testing.T) {
+	p := NewPinger()
+
+	assert.NoError(t, p.AddIP("1.1.1.1"))
+	assert.NoError(t, p.AddIP("2.2.2.2"))
+	assert.NoError(t, p.AddIP("3.3.3.3"))
+	assert.NoError(t, p.AddIP("4.4.4.4"))
+
+	indexes := map[string]int{
+		"1.1.1.1": 0,
+		"2.2.2.2": 1,
+		"3.3.3.3": 2,
+		"4.4.4.4": 3,
+	}
+
+	results, err := p.Run(map[string]bool{}, 1, 1)
+
+	assert.NoError(t, err)
+	assert.Equal(t, len(results), 4)
+	assert.Equal(t, p.index, indexes)
+
+	assert.NoError(t, p.RemoveIP("3.3.3.3"))
+	delete(indexes, "3.3.3.3")
+	indexes["4.4.4.4"] = 2
+
+	_, err = p.Run(map[string]bool{}, 1, 1)
+	assert.NoError(t, err)
+
+	assert.Equal(t, p.index, indexes)
 }
