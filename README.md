@@ -28,11 +28,11 @@ Import this package and write
 p := fastping.NewPinger()
 p.AddIP(os.Args[1])
 
-result, err := p.Run(map[string]bool{})
+result, err := p.Run(map[string]bool{},0,0)
 if err != nil {
 	fmt.Println(err)
 } else {
-	fmt.Printf("Result: %+v\n", result)
+	fmt.Printf("Result: %s:%+v\n",os.Args[1], result[os.Args[1]])
 }
 ```
 
